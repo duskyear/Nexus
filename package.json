@@ -1,0 +1,21 @@
+{
+  "name": "harness-kit-release",
+  "private": true,
+  "scripts": {
+    "guard": "node --import tsx ./tools/guard/cli/index.ts",
+    "template": "node --import tsx ./tools/templates/cli/index.ts",
+    "orchestrator": "node --import tsx ./tools/orchestrator/cli/index.ts",
+    "test": "vitest run",
+    "doctor": "node --import tsx ./tools/guard/cli/index.ts doctor",
+    "harness:delegate": "node --import tsx ./tools/guard/cli/index.ts delegate",
+    "harness:yield": "node --import tsx ./tools/guard/cli/index.ts yield",
+    "harness:exec": "node --import tsx ./tools/guard/cli/index.ts exec",
+    "harness:dream": "node --import tsx ./tools/orchestrator/cli/dream-cli.ts",
+    "harness:spawn": "node --import tsx ./tools/orchestrator/cli/spawn-cli.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "vitest": "^4.1.4",
+    "zod": "^4.3.6"
+  }
+}

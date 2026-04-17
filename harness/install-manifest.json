@@ -1,0 +1,18 @@
+{
+  "template_name": "default",
+  "install_mode": "full",
+  "template_version": "0.1.0",
+  "cli_version": "0.1.0",
+  "installed_at": "2026-04-11T07:04:31.095Z",
+  "method_sources": {
+    "requested": true,
+    "superpowers": {
+      "status": "failed",
+      "error": "omx setup failed: spawnSync omx ENOENT"
+    },
+    "oh_my_codex": {
+      "status": "failed",
+      "error": "omx setup failed: spawnSync omx ENOENT"
+    }
+  }
+}
