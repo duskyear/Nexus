@@ -1,30 +1,5 @@
 export type GuardStatus = "PASS" | "WARN" | "BLOCK";
-export type ReviewStatus = "unknown" | "pass" | "warn" | "block";
-export type GuardStage = "plan" | "openspec" | "review1" | "implementation" | "review2" | "local_run" | "review3" | "hardening";
-export type ExecutionMode = "single-agent" | "role-based single-agent" | "multi-agent";
-
-export interface VerificationEvidence {
-  command: string;
-  exit_code: number;
-  summary: string;
-}
-
-export interface HarnessState {
-  current_stage: GuardStage;
-  approved_plan: boolean;
-  openspec_ready: boolean;
-  review1_passed: boolean;
-  review2_last_status: ReviewStatus;
-  local_run_confirmed: boolean;
-  review3_passed: boolean;
-  execution_mode: ExecutionMode;
-  adc_required: boolean;
-  adc_completed: boolean;
-  last_verification_claim: string | null;
-  last_verification_evidence: VerificationEvidence[];
-  active_operator: "ide" | "codex";
-  operator_lock_reason: string | null;
-}
+export type WorkMode = "analysis" | "implementation" | "validation" | "delivery";
 
 export interface GuardResult {
   status: GuardStatus;

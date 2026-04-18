@@ -20,6 +20,7 @@ import {
   createContextExport,
   createSessionCompactSurface,
   createContextSurface,
+  deriveWorkMode,
   createRuntimeSummary,
   createSessionSurface,
   createSnapshot,
@@ -375,6 +376,7 @@ const commandSpecs: CommandSpec[] = [
           stage: context.state.workflow.current_stage,
           usage_summary: {
             current_stage: context.state.workflow.current_stage,
+            work_mode: deriveWorkMode(context.state.workflow.current_stage),
             execution_mode: context.state.workflow.execution_mode,
             permission_profile: resolvePermissionProfileForStage(config, context.state.workflow.current_stage),
             task_counts: taskCounts,

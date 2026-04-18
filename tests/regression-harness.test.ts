@@ -134,11 +134,16 @@ describe("regression harness", () => {
   test("records claim verification and cap warnings in the event log", async () => {
     const cwd = await createWorkspace();
 
+    const task = await runGuard(["task", "add", "--id", "task-1", "--title", "Verify delivery claim"], { cwd });
+    expect(task.status).toBe("PASS");
+
     const claim = await runGuard(
       [
         "verify-claim",
         "--claim",
         "ready",
+        "--task-id",
+        "task-1",
         "--evidence-command",
         "npm test",
         "--evidence-exit-code",
@@ -162,6 +167,12 @@ describe("regression harness", () => {
       .split(/\r?\n/)
       .filter(Boolean)
       .map((line) => JSON.parse(line) as Record<string, unknown>);
-    expect(eventLog.some((entry) => entry.type === "claim_verified")).toBe(true);
+    const claimEvent = eventLog.find((entry) => entry.type === "claim_verified");
+    expect(claimEvent).toBeDefined();
+    expect(claimEvent?.evidence_refs).toEqual([expect.stringMatching(/^verification-/)]);
+
+    const refreshedState = await loadControlPlaneState(cwd);
+    expect(refreshedState.evidence.verification_entries[0].evidence_ref).toMatch(/^verification-/);
+    expect(refreshedState.tasks.tasks[0].evidence_refs).toEqual([refreshedState.evidence.verification_entries[0].evidence_ref]);
   });
 });

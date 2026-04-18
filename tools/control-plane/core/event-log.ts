@@ -19,6 +19,7 @@ export type EventLogEntry =
   | {
       type: "claim_verified" | "claim_blocked";
       claim: string;
+      evidence_refs?: string[];
       status: "PASS" | "WARN" | "BLOCK";
       reason: string;
       recorded_at: string;

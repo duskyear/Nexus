@@ -5,6 +5,7 @@ export const verificationEntrySchema = z.object({
   command: z.string().min(1),
   exit_code: z.number().int(),
   summary: z.string().min(1),
+  evidence_ref: z.string().min(1).optional(),
   recorded_at: z.string().min(1),
 });
 

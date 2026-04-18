@@ -125,6 +125,7 @@ describe("session and context runtime surface", () => {
     expect(sessionStatus.status).toBe("PASS");
     expect((sessionStatus as Record<string, unknown>).session_surface).toBeDefined();
     expect((sessionStatus as Record<string, any>).session_surface.current_stage).toBe("plan");
+    expect((sessionStatus as Record<string, any>).session_surface.work_mode).toBe("analysis");
     expect((sessionStatus as Record<string, any>).session_surface.permission_profile).toBe("read-only");
     expect((sessionStatus as Record<string, unknown>).runtime_summary).toEqual({
       tool_calls_used: 7,
@@ -143,6 +144,7 @@ describe("session and context runtime surface", () => {
     expect(snapshot.status).toBe("PASS");
     expect((snapshot as Record<string, unknown>).context_surface).toBeDefined();
     expect((snapshot as Record<string, any>).context_surface.attached_roots).toContain(cwd);
+    expect((snapshot as Record<string, any>).context_surface.work_mode).toBe("analysis");
     expect((snapshot as Record<string, any>).context_surface.permission_profile).toBe("read-only");
     expect((snapshot as Record<string, unknown>).runtime_summary).toEqual({
       tool_calls_used: 7,
@@ -195,6 +197,7 @@ describe("session and context runtime surface", () => {
     expect((usage as Record<string, unknown>).usage_summary).toEqual(
       expect.objectContaining({
         current_stage: "plan",
+        work_mode: "analysis",
         execution_mode: "single-agent",
         permission_profile: "read-only",
         task_counts: expect.objectContaining({
@@ -223,6 +226,7 @@ describe("session and context runtime surface", () => {
     expect((sessionStatus as Record<string, unknown>).session_compact).toEqual(
       expect.objectContaining({
         current_stage: "plan",
+        work_mode: "analysis",
         execution_mode: "single-agent",
         permission_profile: "read-only",
         primary_root: cwd,
@@ -256,6 +260,7 @@ describe("session and context runtime surface", () => {
     expect((exported as Record<string, unknown>).context_export).toEqual(
       expect.objectContaining({
         current_stage: "plan",
+        work_mode: "analysis",
         execution_mode: "single-agent",
         permission_profile: "read-only",
         primary_root: cwd,
@@ -291,10 +296,27 @@ describe("session and context runtime surface", () => {
     expect(fileContents).toEqual(
       expect.objectContaining({
         current_stage: "plan",
+        work_mode: "analysis",
         execution_mode: "single-agent",
         permission_profile: "read-only",
         primary_root: cwd,
       }),
     );
+  });
+
+  test("work mode follows the active stage", async () => {
+    const cwd = await createWorkspace();
+    const state = await loadControlPlaneState(cwd);
+    state.workflow.current_stage = "local_run";
+    await saveControlPlaneState(cwd, state);
+
+    const sessionStatus = await runGuard(["session", "status"], { cwd });
+    expect((sessionStatus as Record<string, any>).session_surface.work_mode).toBe("validation");
+
+    state.workflow.current_stage = "review3";
+    await saveControlPlaneState(cwd, state);
+
+    const usage = await runGuard(["usage", "summary"], { cwd });
+    expect((usage as Record<string, any>).usage_summary.work_mode).toBe("delivery");
   });
 });

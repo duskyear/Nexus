@@ -1,6 +1,6 @@
 # Integration Checklist
 
-Use this checklist when setting up a new machine for the full `harness-kit-release` + `superpowers` + `oh-my-codex` workflow.
+Use this checklist when setting up a new machine for the full `Nexus` + optional upstream method sources + optional MCP workflow.
 
 ## 1. Required Sources
 
@@ -8,6 +8,12 @@ Use this checklist when setting up a new machine for the full `harness-kit-relea
 - [ ] `superpowers` skills are visible to the Codex skill discovery path
 - [ ] `oh-my-codex` is installed or discoverable in the intended runtime
 - [ ] the local bundled `skills/` subset in this repository is still present
+
+## 1.5 Optional MCP
+
+- [ ] only enable MCP if the current workflow actually benefits from live external tools or data
+- [ ] start with the minimum set: `filesystem`, `git`, `fetch`
+- [ ] do not add extra MCP servers without a named repeated manual step they remove
 
 ## 2. Install Path
 
@@ -17,6 +23,7 @@ Use this checklist when setting up a new machine for the full `harness-kit-relea
 - [ ] install or update `oh-my-codex` using its upstream instructions
 - [ ] run `npm run doctor -- --fix --superpowers-source-dir <path-to-superpowers> --omx-command <path-to-omx>` if a repair pass is needed
 - [ ] restart Codex or the relevant runtime after both installs
+- [ ] if using MCP, confirm only the minimum required servers are enabled
 
 ## 3. Verification
 
@@ -26,11 +33,13 @@ Use this checklist when setting up a new machine for the full `harness-kit-relea
 - [ ] confirm `guard skills` prints a sensible recommended-skill list
 - [ ] confirm `guard stage plan` still behaves as a normal harness stage command
 - [ ] confirm the local bundled skills still route correctly when upstream sources are available
+- [ ] if MCP is enabled, confirm the minimum required server set is actually reachable
 
 ## 4. Missing Source Handling
 
 - [ ] if `superpowers` is missing, keep using the local bundled `skills/` subset
 - [ ] if `oh-my-codex` is missing, keep using the harness workflow and note the reduced-capability environment
+- [ ] if optional MCP is missing, keep using local files and local shell flow
 - [ ] only treat the missing source as a hard block when the current task explicitly depends on that upstream-only method
 - [ ] record the missing capability clearly and provide the install/update hint
 
@@ -45,4 +54,5 @@ Use this checklist when setting up a new machine for the full `harness-kit-relea
 - [ ] the machine can use the local harness workflow
 - [ ] the machine can see the upstream skill library when needed
 - [ ] the machine can see the upstream runtime/workflow layer when needed
+- [ ] MCP, if enabled, is minimal and justified
 - [ ] no core stage gate depends on an unstated local machine assumption

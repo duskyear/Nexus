@@ -78,6 +78,8 @@ function createState(overrides: Partial<HarnessState> = {}): HarnessState {
     adc_completed: false,
     last_verification_claim: null,
     last_verification_evidence: [],
+    active_operator: "ide",
+    operator_lock_reason: null,
     ...overrides,
   };
 }
@@ -127,11 +129,12 @@ describe("verification policy", () => {
   test("records verification claim and evidence on state", () => {
     const state = withVerificationRecorded(createState(), {
       claim: "ready",
-      evidenceItems: [{ command: "vitest", exit_code: 0, summary: "green" }],
+      evidenceItems: [{ command: "vitest", exit_code: 0, summary: "green", evidence_ref: "verification-1" }],
     });
 
     expect(state.last_verification_claim).toBe("ready");
     expect(state.last_verification_evidence).toHaveLength(1);
+    expect(state.last_verification_evidence[0].evidence_ref).toBe("verification-1");
   });
 });
 

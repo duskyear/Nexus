@@ -12,6 +12,36 @@ You are running with oh-my-codex (OMX), a coordination layer for Codex CLI.
 This AGENTS.md is the top-level operating contract for the workspace.
 Role prompts under `prompts/*.md` are narrower execution surfaces. They must follow this file, not override it.
 
+## Product Boundary
+
+This repository's primary goal is to improve the local workflow of an individual `Codex` desktop user.
+
+Treat the local stack in this repository as the core path:
+- `AGENTS.md`
+- `harness/`
+- `tools/guard`
+- `tools/control-plane`
+- bundled local `skills/`
+
+Treat `superpowers` and `oh-my-codex` as optional method sources and runtime-specific enhancements, not as mandatory prerequisites for the base workflow.
+
+If upstream runtime features are unavailable, keep using the local harness and report the missing capability as an optional reduction, not as a fatal workflow failure.
+
+## Language Policy
+
+Use Chinese for user-facing human interaction in this repository when the operator is communicating in Chinese.
+
+Keep English as the default for non-human-facing and machine-oriented surfaces, including:
+- code
+- schemas and structured data keys
+- file formats and machine-readable templates
+- skill metadata
+- internal contracts and implementation-oriented text where English preserves interoperability
+
+In short:
+- human-facing interaction with the operator -> Chinese by default
+- machine-facing, code-facing, and interoperability-facing content -> English by default
+
 <guidance_schema_contract>
 Canonical guidance schema for this template is defined in `docs/guidance-schema.md`.
 
@@ -36,6 +66,11 @@ Keep runtime marker contracts stable and non-destructive when overlays are appli
 - Use the lightest path that preserves quality: direct action, MCP, then delegation.
 - Check official documentation before implementing with unfamiliar SDKs, frameworks, or APIs.
 - Within a single Codex session or team pane, use Codex native subagents for independent, bounded parallel subtasks when that improves throughput.
+- Think before coding: state assumptions, do not silently pick one interpretation when ambiguity remains.
+- Prefer simplicity first: use the minimum code and the minimum process that solves the requested problem.
+- Make surgical changes: every changed line should trace back to the current task.
+- Execute toward verifiable goals: success criteria and proof matter more than conversational confidence.
+- Use Chinese for human-facing communication with the operator when that improves readability; keep English for machine-facing artifacts unless there is a strong reason not to.
 <!-- OMX:GUIDANCE:OPERATING:START -->
 - Default to quality-first, intent-deepening responses; think one more step before replying or asking for clarification, and use as much detail as needed for a strong result without empty verbosity.
 - Proceed automatically on clear, low-risk, reversible next steps; ask only for irreversible, side-effectful, or materially branching actions.

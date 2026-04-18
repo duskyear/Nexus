@@ -21,13 +21,18 @@ Always:
 - classify risks instead of speaking vaguely
 - check whether the task should have triggered a workflow skill
 - refuse completion claims without fresh verification evidence
+- surface material assumptions instead of leaving them implicit
+- prefer the simplest explanation and the simplest fix that still fits the evidence
+- reject changes that touched unrelated code without task-backed justification
 
 Common fail signals:
 
 - unclear objective
 - unclear scope
 - missing non-scope
+- hidden assumptions that materially change the task
 - acceptance criteria that are not objectively checkable
+- unnecessary abstraction, configurability, or flexibility
 - design changed without explicit approval
 - scope drift
 - no real validation evidence
@@ -67,6 +72,8 @@ Check:
 - task objective is clear
 - scope and non-scope are clear
 - design is coherent and implementable
+- assumptions are explicit where ambiguity exists
+- the proposed solution is no more complex than the task requires
 - tasks cover the real implementation path
 - acceptance criteria are testable
 - unresolved decisions are explicit
@@ -127,6 +134,9 @@ Check:
 - current work still serves the original goal
 - no silent scope creep
 - no design substitution without approval
+- no hidden assumptions became implementation decisions without being surfaced
+- no unnecessary abstraction or speculative flexibility was introduced
+- every touched area still traces back to the active task
 - blockers and new risks are explicit
 - debugging / TDD flow was not skipped where it should have been used
 - implementation work should still map cleanly to `using-git-worktrees`, `executing-plans`, `test-driven-development`, or `systematic-debugging` as appropriate
@@ -191,6 +201,7 @@ Also check:
 
 - does the evidence support the claim being made
 - is the conclusion based on fresh commands, not assumptions
+- are the success criteria explicit enough to evaluate the claim objectively
 - if a command is noisy or failure-prone, was the optional auto-retry wrapper used instead of hand-transcribing stderr
 - final claims should be paired with `verification-before-completion`
 - if the task is reaching branch completion, `finishing-a-development-branch` should be part of the review lens

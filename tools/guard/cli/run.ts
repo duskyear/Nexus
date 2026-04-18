@@ -1,4 +1,4 @@
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { execSync } from "node:child_process";
 import { constants } from "node:fs";
 import { join } from "node:path";
@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { loadConfig, loadState } from "../state/store.js";
 import { dispatchControlPlaneCommand } from "../../control-plane/registry/commands.js";
 import { ensureMethodSources, pathExists, readInstallManifest, writeInstallManifest } from "../../shared/install.mjs";
+import { collectLocalSkillCatalog, localSkillNamesFromCatalog } from "../core/skills.js";
 import {
   applyLegacyHarnessState,
   loadControlPlaneState,
@@ -607,21 +608,6 @@ function parseExecutionMode(value: string | undefined): ExecutionMode | undefine
   throw new Error("Unsupported execution mode '" + value + "'. Expected one of: single-agent, role-based single-agent, multi-agent.");
 }
 
-async function collectSkillNames(skillDir: string): Promise<Set<string>> {
-  try {
-    const entries = await readdir(skillDir, { withFileTypes: true });
-    return new Set(entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name));
-  } catch {
-    return new Set();
-  }
-}
-
-async function getLocalSkillNames(cwd: string): Promise<Set<string>> {
-  const localSkills = await collectSkillNames(join(cwd, "skills"));
-  const bundledSkills = await collectSkillNames(BUNDLED_SKILLS_DIR);
-  return new Set([...localSkills, ...bundledSkills]);
-}
-
 function filterSkillsBySource(skills: string[], source: SkillSource, localSkillNames: Set<string>): string[] {
   if (source === "all") {
     return skills;
@@ -650,6 +636,7 @@ function buildVerificationEvidence(
       command,
       exit_code: exitCodes[index],
       summary: summaries[index],
+      evidence_ref: `verification-${Date.now()}-${index + 1}`,
     })),
   };
 }
@@ -780,7 +767,8 @@ export async function runGuard(argv: string[], options: RunGuardOptions): Promis
   if (command === "skills") {
     const stage = (readFlag(argv, "--stage") as GuardStage | undefined) ?? controlPlaneState.workflow.current_stage;
     const source = parseSkillSource(readFlag(argv, "--source"));
-    const localSkillNames = await getLocalSkillNames(options.cwd);
+    const localSkillCatalog = await collectLocalSkillCatalog(join(options.cwd, "skills"), BUNDLED_SKILLS_DIR);
+    const localSkillNames = localSkillNamesFromCatalog(localSkillCatalog);
     const recommendedSkills = filterSkillsBySource(
       stage ? config.skill_recommendations[stage] ?? [] : [],
       source,
@@ -799,6 +787,9 @@ export async function runGuard(argv: string[], options: RunGuardOptions): Promis
         : `No${sourceLabel} skill recommendations are configured for ${stage}.`,
       stage,
       recommended_skills: recommendedSkills,
+      local_skill_catalog: source === "upstream"
+        ? []
+        : localSkillCatalog,
       workflow_hints: recommendedSkills.length > 0
         ? [`Recommended${sourceLabel} skills: ${recommendedSkills.join(", ")}`]
         : [`No${sourceLabel} skill recommendations are configured for ${stage}.`],
@@ -1126,12 +1117,32 @@ export async function runGuard(argv: string[], options: RunGuardOptions): Promis
 
   if (command === "verify-claim") {
     const claim = readFlag(argv, "--claim");
+    const taskIds = readFlags(argv, "--task-id");
     const evidenceCount = Number.parseInt(readFlag(argv, "--evidence-count") ?? "0", 10);
     const structuredEvidence = buildVerificationEvidence(
       readFlags(argv, "--evidence-command"),
       readIntegerFlags(argv, "--evidence-exit-code"),
       readFlags(argv, "--evidence-summary"),
     );
+    const missingTaskIds = taskIds.filter(
+      (taskId) => !controlPlaneState.tasks.tasks.some((task) => task.id === taskId),
+    );
+    if (missingTaskIds.length > 0) {
+      return attachPermissionProfile(
+        attachRuntimeCaps(
+          {
+            status: "BLOCK",
+            reason: `verify-claim could not link evidence to missing task ids: ${missingTaskIds.join(", ")}.`,
+            evidence_checked: ["task_ledger", "task_id"],
+            next_step: "Add the task first or use an existing task id before linking verification evidence.",
+            stage: controlPlaneState.workflow.current_stage,
+          },
+          runtimeCapReport,
+          true,
+        ),
+        resolvePermissionProfileForStage(config, controlPlaneState.workflow.current_stage),
+      );
+    }
     const result = evaluateClaim(config, {
       claim: readFlag(argv, "--claim"),
       evidenceCount,
@@ -1143,12 +1154,33 @@ export async function runGuard(argv: string[], options: RunGuardOptions): Promis
     if (result.status !== "BLOCK") {
       const state = legacyState ?? toLegacyHarnessState(controlPlaneState);
       const nextLegacy = withVerificationRecorded(state, { claim, evidenceItems: structuredEvidence.evidenceItems });
-      await saveControlPlaneState(options.cwd, applyLegacyHarnessState(controlPlaneState, nextLegacy));
+      let nextControlPlaneState = applyLegacyHarnessState(controlPlaneState, nextLegacy);
+      for (const taskId of taskIds) {
+        for (const evidenceItem of structuredEvidence.evidenceItems) {
+          if (!evidenceItem.evidence_ref) {
+            continue;
+          }
+          const linkedTask = await dispatchControlPlaneCommand(
+            ["task", "link-evidence", "--id", taskId, "--evidence-ref", evidenceItem.evidence_ref],
+            {
+              cwd: options.cwd,
+              state: nextControlPlaneState,
+            },
+          );
+          if (linkedTask?.nextState) {
+            nextControlPlaneState = linkedTask.nextState;
+          }
+        }
+      }
+      await saveControlPlaneState(options.cwd, nextControlPlaneState);
     }
 
     await appendEventLog(options.cwd, {
       type: result.status === "PASS" ? "claim_verified" : "claim_blocked",
       claim: claim ?? "unknown",
+      evidence_refs: structuredEvidence.evidenceItems
+        .map((item) => item.evidence_ref)
+        .filter((value): value is string => Boolean(value)),
       status: result.status,
       reason: result.reason,
       recorded_at: new Date().toISOString(),

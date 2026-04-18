@@ -20,6 +20,26 @@ function parseJsonFile(raw: string): unknown {
   return JSON.parse(normalized);
 }
 
+function isPristineLegacyState(state: HarnessState): boolean {
+  const initial = createInitialState();
+  return (
+    state.current_stage === initial.current_stage &&
+    state.approved_plan === initial.approved_plan &&
+    state.openspec_ready === initial.openspec_ready &&
+    state.review1_passed === initial.review1_passed &&
+    state.review2_last_status === initial.review2_last_status &&
+    state.local_run_confirmed === initial.local_run_confirmed &&
+    state.review3_passed === initial.review3_passed &&
+    state.execution_mode === initial.execution_mode &&
+    state.adc_required === initial.adc_required &&
+    state.adc_completed === initial.adc_completed &&
+    state.last_verification_claim === initial.last_verification_claim &&
+    state.last_verification_evidence.length === initial.last_verification_evidence.length &&
+    state.active_operator === initial.active_operator &&
+    state.operator_lock_reason === initial.operator_lock_reason
+  );
+}
+
 export async function loadConfig(cwd: string): Promise<GuardConfig> {
   try {
     const raw = await readFile(join(cwd, CONFIG_PATH), "utf8");
@@ -39,20 +59,7 @@ export async function loadState(cwd: string): Promise<HarnessState | null> {
   try {
     await access(fullPath, constants.F_OK);
   } catch {
-    return legacy.current_stage === "plan" &&
-      !legacy.approved_plan &&
-      !legacy.openspec_ready &&
-      !legacy.review1_passed &&
-      legacy.review2_last_status === "unknown" &&
-      !legacy.local_run_confirmed &&
-      !legacy.review3_passed &&
-      legacy.execution_mode === "single-agent" &&
-      !legacy.adc_required &&
-      !legacy.adc_completed &&
-      legacy.last_verification_claim === null &&
-      legacy.last_verification_evidence.length === 0
-      ? null
-      : legacy;
+    return isPristineLegacyState(legacy) ? null : legacy;
   }
 
   const raw = await readFile(fullPath, "utf8");

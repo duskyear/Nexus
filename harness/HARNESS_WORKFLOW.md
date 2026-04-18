@@ -62,6 +62,13 @@ Skill source order:
 - upstream `oh-my-codex` fills in broader Codex workflow and orchestration methods when the task benefits from them
 - skills are recommendations, not stage transitions
 
+Behavioral rules across all stages:
+
+- think before coding: surface assumptions and ambiguity instead of silently choosing
+- simplicity first: prefer the smallest process and the smallest implementation that still solves the task
+- surgical changes: do not edit unrelated code, comments, or formatting
+- goal-driven execution: define success criteria and verify against fresh evidence
+
 External method prerequisites:
 
 - For the full cross-machine workflow, the current machine should have access to the upstream `superpowers` skill library and the upstream `oh-my-codex` workflow layer.

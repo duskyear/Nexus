@@ -1,5 +1,21 @@
 import type { ControlPlaneState } from "../state/store.js";
-import type { SessionSnapshot } from "../../shared/types.js";
+import type { SessionSnapshot, WorkMode } from "../../shared/types.js";
+
+export function deriveWorkMode(currentStage: ControlPlaneState["workflow"]["current_stage"]): WorkMode {
+  if (currentStage === "plan" || currentStage === "openspec" || currentStage === "review1") {
+    return "analysis";
+  }
+
+  if (currentStage === "implementation" || currentStage === "review2") {
+    return "implementation";
+  }
+
+  if (currentStage === "local_run") {
+    return "validation";
+  }
+
+  return "delivery";
+}
 
 export function createRuntimeSummary(state: ControlPlaneState): Record<string, unknown> {
   return {
@@ -23,6 +39,7 @@ export function createSessionSurface(
   return {
     session_id: state.session.session_id,
     current_stage: state.workflow.current_stage,
+    work_mode: deriveWorkMode(state.workflow.current_stage),
     execution_mode: state.workflow.execution_mode,
     permission_profile: options?.permissionProfile ?? null,
     primary_root: state.session.primary_root,
@@ -46,6 +63,7 @@ export function createSessionCompactSurface(
 ): Record<string, unknown> {
   return {
     current_stage: state.workflow.current_stage,
+    work_mode: deriveWorkMode(state.workflow.current_stage),
     execution_mode: state.workflow.execution_mode,
     permission_profile: options?.permissionProfile ?? null,
     primary_root: state.session.primary_root,
@@ -84,6 +102,7 @@ export function createContextExport(
 
   return {
     current_stage: state.workflow.current_stage,
+    work_mode: deriveWorkMode(state.workflow.current_stage),
     execution_mode: state.workflow.execution_mode,
     permission_profile: options?.permissionProfile ?? null,
     primary_root: state.session.primary_root,

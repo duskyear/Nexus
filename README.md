@@ -1,14 +1,97 @@
-# harness-kit
+# Nexus
 
-`harness-kit` turns this harness into an installable CLI + template system.
+`Nexus` is a local workflow enhancement layer for individual `Codex` desktop users.
 
-## Local development
+It adds three things on top of plain repository prompting:
 
-From this repository:
+- a stage-aware execution harness
+- structured state, evidence, and task tracking
+- a small local skill bundle for recurring workflows
 
-```bash
-node .\packages\cli\bin\harness-kit.js init
-```
+## What Nexus Is
+
+- A local, repo-scoped workflow layer
+- A stricter way to express task boundaries, validation, and delivery claims
+- A thin control plane around `Codex`, not a replacement for it
+- A system that still works with only the local repo assets in this repository
+
+## What Nexus Is Not
+
+- Not a general-purpose agent platform
+- Not a cloud runtime, sandbox service, or multi-user control plane
+- Not a requirement to run the full `superpowers` or `OMX` stack
+- Not a reason to default every task into multi-agent orchestration
+
+## Core Model
+
+`Nexus` is split into four local layers:
+
+- `AGENTS.md`: long-lived rules and operating constraints
+- `harness/`: stage flow, prompt templates, review gates, and operator guidance
+- `tools/`: guard, control-plane, orchestration helpers, and template commands
+- `skills/`: local, high-frequency workflow methods
+
+Local skills are discovered from `skills/<name>/SKILL.md` and should declare at least:
+
+- `name`
+- `description`
+
+## Language Policy
+
+For this repository:
+
+- user-facing human interaction should default to Chinese when the operator is using Chinese
+- code, schema keys, structured outputs, skill metadata, and other machine-facing surfaces should remain in English by default
+
+## Default Path
+
+For day-to-day `Codex` desktop use, prefer the lightest path that preserves verification quality.
+
+Small task:
+
+- use a focused task prompt
+- make the smallest valid change
+- run the smallest relevant validation
+- do not claim completion without evidence
+
+Medium task:
+
+- `plan`
+- `implementation`
+- `local_run`
+- `review3`
+
+High-risk task:
+
+- pause for explicit high-risk confirmation
+- keep scope narrow
+- verify before any completion claim
+
+## Optional Method Sources
+
+`superpowers` and `oh-my-codex` are optional method sources.
+
+Use them when they add value:
+
+- deeper planning and review workflows
+- richer external skill libraries
+- runtime-specific `OMX` workflows in environments that actually support them
+
+Do not treat them as required for the base `Nexus` workflow. The local `guard`, `harness`, `control-plane`, and bundled `skills` remain the core path.
+
+## Optional MCP
+
+MCP is optional in `Nexus`.
+
+If you need live external tools or data, start with the smallest useful set:
+
+- `filesystem`
+- `git`
+- `fetch`
+
+Do not make the base local workflow depend on MCP. For many personal `Codex` tasks, the local harness plus direct repo access is still the better path.
+
+## Local Development
 
 Run the test suite:
 
@@ -16,47 +99,42 @@ Run the test suite:
 .\node_modules\.bin\vitest.cmd run
 ```
 
-## Publish to GitHub Packages
-
-This repo publishes the CLI package to GitHub Packages, not npmjs.com.
-
-To publish a new version:
+Useful local scripts:
 
 ```bash
-git tag cli-v0.1.1
-git push origin cli-v0.1.1
+npm run guard
+npm run doctor
+npm run template
+npm run orchestrator
 ```
 
-That tag triggers the GitHub Actions workflow in `.github/workflows/publish-cli.yml`.
+## Install Into Another Project
 
-## Install for personal use
+From this source tree:
 
-From this source tree, initialize a new project with:
+```bash
+node .\bootstrap.mjs
+```
+
+If you want optional upstream method sources as well:
 
 ```bash
 node .\bootstrap.mjs --with-method-sources --superpowers-source-dir C:\path\to\superpowers --omx-command C:\path\to\omx.cmd
 ```
 
-If you already have the project scaffold and only want to repair the external method sources, run:
+## What Gets Installed
 
-```bash
-npm run doctor -- --fix --superpowers-source-dir C:\path\to\superpowers --omx-command C:\path\to\omx.cmd
-```
-
-If you want the published-package path instead of the source-tree bootstrap, configure the GitHub Packages registry for the `@duskyear` scope once and use the package CLI shown by the published release.
-
-## What gets installed
-
-`bootstrap.mjs` copies the template into the target project and adds local scripts for:
+`bootstrap.mjs` copies the local template into the target project and adds local scripts for:
 
 - `guard`
 - `doctor`
 - `template`
 - `orchestrator`
 
-It also copies the bundled `skills/` subset, writes `harness.version.json`, and writes `harness/install-manifest.json` so `doctor` can compare the installed template against the current one and report method-source status.
+It also copies the bundled `skills/` subset, writes `harness.version.json`, and writes `harness/install-manifest.json`.
 
 ## Notes
 
-- This repo is source, not the final install target.
-- The intended long-term workflow is: publish once through GitHub, then initialize every new project from the package or from the source-tree bootstrap when working locally.
+- This repository is the source tree, not the generated target project
+- The local workflow should remain useful even without optional upstream integrations
+- See [docs/nexus-codex-workflow-audit-2026-04-18.md](/C:/Users/Administrator/Desktop/Nexus/docs/nexus-codex-workflow-audit-2026-04-18.md) for the current architecture audit and direction checkpoint

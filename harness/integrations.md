@@ -1,16 +1,29 @@
 # Integrations
 
-This document defines how `harness-kit-release` should rely on the external `superpowers` and `oh-my-codex` method sources.
+This document defines how `Nexus` should rely on optional external method sources and optional MCP servers.
 
 If you need a step-by-step setup flow, use `integration-checklist.md`.
 
 ## Purpose
 
-- `harness-kit-release` remains the control plane for stage gates, state, evidence, and safety.
+- `Nexus` remains the control plane for stage gates, state, evidence, and safety.
 - `superpowers` is the method library for planning, debugging, review, verification, and branch completion.
 - `oh-my-codex` is the runtime/workflow layer for Codex-oriented clarification, planning, orchestration, and completion loops.
+- MCP is the standard way to connect live external tools and data when the local workflow truly benefits from them.
 
-These integrations are environment prerequisites for the full workflow experience, not core harness dependencies.
+These integrations are optional enhancements for the full workflow experience, not core harness dependencies.
+
+## Core Boundary
+
+The local baseline remains:
+
+- `AGENTS.md`
+- `harness/`
+- `tools/guard`
+- `tools/control-plane`
+- local bundled `skills/`
+
+Do not make the base workflow depend on MCP. Use MCP only when it removes real copy/paste work or materially improves verification quality.
 
 ## Required External Sources
 
@@ -42,9 +55,44 @@ On a new machine, do the following before relying on upstream-only methods:
 4. Confirm the local bundled `skills/` subset still works inside this repository.
 5. Only then rely on upstream-only skills or workflow helpers.
 
+## Minimal MCP Set
+
+For an individual `Codex` desktop user, the recommended MCP starting point is intentionally small:
+
+1. `filesystem`
+- Use when you need stable access to files outside the immediate repo working set.
+- Do not use it to replace the local repo workflow.
+
+2. `git`
+- Use for richer repository inspection, history lookups, or branch metadata when local shell output is too awkward.
+- Do not make basic git status/diff paths depend on MCP.
+
+3. `fetch`
+- Use for live external documentation, references, or remote content when local context is insufficient.
+- Do not use it as a default substitute for local docs or provided project files.
+
+Start with these three only. Add more MCP servers only after you can name the repeated manual step they eliminate.
+
+## MCP Decision Rule
+
+Use MCP when all three are true:
+
+- the data is live or external
+- the task would otherwise require repetitive copy/paste
+- the added tool boundary is worth the context cost
+
+Do not use MCP just because it exists. For many local coding tasks, direct file access plus the local harness is still the better path.
+
+## MCP Non-Goals
+
+- Do not turn MCP into a required runtime dependency for core stage gates.
+- Do not add servers just to mirror capabilities the local shell already covers well.
+- Do not treat more MCP servers as automatically better.
+- Do not let MCP hide verification; the evidence still needs to be explicit in the harness.
+
 ## Verification
 
-Use the smallest practical check that the external method sources are available:
+Use the smallest practical check that the external method sources and optional MCP setup are available:
 
 - confirm the `superpowers` skill library is visible to the Codex environment
   - if you installed it as a clone, verify the `skills/` directory is reachable from the Codex skill discovery path
@@ -57,6 +105,10 @@ Use the smallest practical check that the external method sources are available:
 - confirm the local `skills/` subset still routes correctly through `harness-kit-release`
   - run `guard skills`
   - run one stage command such as `guard stage plan`
+- if you intentionally enabled MCP, confirm the minimum set you rely on is available
+  - `filesystem` if you need non-local file reach
+  - `git` if you need repository metadata beyond the normal local path
+  - `fetch` if you need live external documents
 
 If a check fails, treat it as a capability reduction rather than a broken harness unless the current task explicitly depends on the missing upstream method.
 
@@ -70,6 +122,12 @@ If either upstream source is unavailable:
 - do not block core harness stage gates unless the current task truly requires the missing upstream method
 - label the environment as partially capable rather than failed
 - only escalate to a hard block when the requested work explicitly needs an upstream-only method
+
+If optional MCP is unavailable:
+
+- keep using the local harness and local repo workflow
+- report the missing MCP capability as optional unless the task explicitly needs it
+- prefer direct local files and local shell commands before introducing more MCP setup
 
 ## Versioning
 
@@ -89,6 +147,7 @@ If either upstream source is unavailable:
 
 The intended operating model is:
 
-- `harness-kit-release` decides whether work may proceed.
+- `Nexus` decides whether work may proceed.
 - `superpowers` says how to do the work.
 - `oh-my-codex` helps Codex run that workflow smoothly.
+- MCP provides optional live external context when the local path is not enough.

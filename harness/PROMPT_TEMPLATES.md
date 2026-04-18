@@ -23,6 +23,8 @@ Also decide:
 - likely workflow skills to consult first, if any
 
 If the request is unclear, call out the first skill that should guide clarification, such as `deep-interview` for ambiguity or `brainstorming` for design.
+State any material assumptions explicitly instead of silently choosing one interpretation.
+If there are multiple plausible interpretations, name them and explain which one still needs confirmation.
 
 If the task is not yet concrete enough to implement safely, make that explicit instead of guessing.
 ```
@@ -72,6 +74,10 @@ Enter the implementation stage now.
 Only handle one task or one small batch.
 Do not silently expand scope.
 Do not do unrelated cleanup or refactor.
+Do not make hidden assumptions when the request or code behavior is ambiguous.
+Prefer the simplest implementation that satisfies the current task.
+Do not introduce speculative abstractions, configurability, or flexibility that was not requested.
+Touch only files and code paths that are directly related to the current task.
 If the task is behavior-changing work, default to TDD.
 If the task is debugging work, follow systematic-debugging first.
 If the task needs broader workflow help, consider the local bundled skills first and then upstream reference skills such as `requesting-code-review`, `receiving-code-review`, or `finishing-a-development-branch` when relevant.
@@ -92,6 +98,9 @@ Only handle this one small task.
 Rules:
 - make only necessary changes
 - prefer minimal, targeted edits
+- avoid hidden assumptions; state them if they matter
+- avoid unnecessary abstractions or "while I'm here" improvements
+- do not modify adjacent code unless the current task requires it
 - stop before any high-risk change
 - do not upgrade to multi-agent without a real justification
 - run the smallest relevant validation
@@ -135,6 +144,9 @@ Review:
 - scope control
 - design consistency
 - blockers and new risks
+- whether hidden assumptions or silent interpretation changes appeared
+- whether the implementation became more abstract or configurable than the task required
+- whether unrelated files or adjacent code were touched without justification
 - whether debugging / TDD flow was skipped
 
 If orchestration is active, also review:
@@ -219,6 +231,8 @@ Follow a root-cause debugging flow:
 5. state one concrete root-cause hypothesis
 6. propose the smallest validation step
 
+Do not implement a fix before the hypothesis and the smallest validation step are explicit.
+
 Output:
 - symptom
 - reproduction
@@ -238,12 +252,14 @@ Please:
 2. run it now
 3. read the full output and exit code
 4. capture the command, exit code, and result summary as structured evidence
-5. state whether the evidence really supports the claim
-6. if the command is noisy or failure-prone, prefer the optional auto-retry wrapper so stderr and retry count stay attached to the evidence
-7. if a task ledger exists, link the claim back to task ids and evidence refs
+5. state the concrete success criteria for the claim
+6. state whether the evidence really supports the claim
+7. if the command is noisy or failure-prone, prefer the optional auto-retry wrapper so stderr and retry count stay attached to the evidence
+8. if a task ledger exists, link the claim back to task ids and evidence refs
 
 Output:
 - claim being evaluated
+- success criteria
 - verification evidence
 - fresh verification evidence only, not stale claims
 - whether the claim is supported

@@ -2,7 +2,7 @@ import { access, mkdir, readFile, writeFile, open, unlink } from "node:fs/promis
 import { constants } from "node:fs";
 import { join } from "node:path";
 
-import type { HarnessState, VerificationEvidence } from "../../shared/types.js";
+import type { HarnessState, VerificationEvidence } from "../../guard/schema/state.js";
 import {
   createEvidenceLog,
   createRuntimeContext,
@@ -124,6 +124,7 @@ function migrateLegacyState(cwd: string, legacy: HarnessState | null): ControlPl
     command: item.command,
     exit_code: item.exit_code,
     summary: item.summary,
+    evidence_ref: item.evidence_ref,
     recorded_at: new Date(0).toISOString(),
   }));
 
@@ -182,10 +183,11 @@ export function toLegacyHarnessState(state: ControlPlaneState): HarnessState {
   const latestEvidence = latestClaim
     ? state.evidence.verification_entries
         .filter((entry) => entry.claim === latestClaim)
-        .map<VerificationEvidence>(({ command, exit_code, summary }) => ({
+        .map<VerificationEvidence>(({ command, exit_code, summary, evidence_ref }) => ({
           command,
           exit_code,
           summary,
+          evidence_ref,
         }))
     : [];
 
@@ -237,6 +239,7 @@ export function applyLegacyHarnessState(
       command: item.command,
       exit_code: item.exit_code,
       summary: item.summary,
+      evidence_ref: item.evidence_ref,
       recorded_at: new Date().toISOString(),
     }));
   }

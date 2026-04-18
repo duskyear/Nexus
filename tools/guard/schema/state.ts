@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 import { executionModeSchema } from "./config.js";
-import type { HarnessState } from "../../shared/types.js";
 
 export const reviewStatusSchema = z.enum(["unknown", "pass", "warn", "block"]);
 export const verificationEvidenceSchema = z.object({
   command: z.string().min(1),
   exit_code: z.number().int(),
   summary: z.string().min(1),
+  evidence_ref: z.string().min(1).optional(),
 });
 
 export const harnessStateSchema = z.object({
@@ -36,7 +36,9 @@ export const harnessStateSchema = z.object({
   operator_lock_reason: z.string().nullable().default(null),
 });
 
-export type { HarnessState, ReviewStatus, VerificationEvidence };
+export type ReviewStatus = z.infer<typeof reviewStatusSchema>;
+export type VerificationEvidence = z.infer<typeof verificationEvidenceSchema>;
+export type HarnessState = z.infer<typeof harnessStateSchema>;
 
 export function createInitialState(): HarnessState {
   return {

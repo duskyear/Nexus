@@ -7,6 +7,7 @@ This is the one-minute entry guide.
 Use it to answer:
 
 - what stage am I in
+- what user-facing work mode am I in
 - what file should I read next
 - which skill probably triggers first
 - does this task really need orchestration
@@ -33,6 +34,13 @@ Default execution mode:
 - consider the external OpenSpec skill for medium or large tasks, multi-file changes, or when a fuller artifact set would reduce rework
 
 ## 3. What To Read Next
+
+Work-mode mapping:
+
+- `plan` / `openspec` / `review1` -> `analysis`
+- `implementation` / `review2` -> `implementation`
+- `local_run` -> `validation`
+- `review3` / `hardening` -> `delivery`
 
 - Need the full stage flow: `HARNESS_WORKFLOW.md`
 - Need review criteria: `REVIEW_GATE_CHECKLIST.md`
@@ -79,6 +87,11 @@ For the full experience on a new machine:
 - No validation, no completion claim.
 - Do not silently expand scope.
 - Stop before high-risk changes and ask for confirmation.
+
+Language rule:
+
+- speak to the operator in Chinese when the operator is using Chinese
+- keep code, schemas, machine-facing fields, and internal interoperability surfaces in English
 
 High-risk changes:
 

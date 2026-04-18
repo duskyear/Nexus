@@ -11,6 +11,7 @@ import {
   loadControlPlaneState,
   saveControlPlaneState,
 } from "../tools/control-plane/state/store.js";
+import { loadState } from "../tools/guard/state/store.js";
 
 const tempRoots: string[] = [];
 
@@ -26,6 +27,19 @@ async function createWorkspace(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "harness-control-plane-"));
   tempRoots.push(root);
   await mkdir(join(root, "harness"), { recursive: true });
+  await mkdir(join(root, "skills", "custom-checklist"), { recursive: true });
+  await writeFile(
+    join(root, "skills", "custom-checklist", "SKILL.md"),
+    [
+      "---",
+      "name: custom-checklist",
+      "description: Local project checklist for repo-specific validation.",
+      "---",
+      "",
+      "# Custom Checklist",
+    ].join("\n"),
+    "utf8",
+  );
   await writeFile(
     join(root, "harness", "guard.config.json"),
     JSON.stringify(
@@ -131,6 +145,8 @@ describe("control plane state", () => {
           last_verification_evidence: [
             { command: "vitest", exit_code: 0, summary: "green" },
           ],
+          active_operator: "ide",
+          operator_lock_reason: null,
         },
         null,
         2,
@@ -155,6 +171,16 @@ describe("control plane state", () => {
 
     expect(workflowFile.current_stage).toBe("implementation");
     expect(evidenceFile.verification_entries[0].claim).toBe("ready");
+  });
+
+  test("treats pristine split control-plane state as no legacy state when the legacy file is absent", async () => {
+    const cwd = await createWorkspace();
+
+    const state = await loadControlPlaneState(cwd);
+    await saveControlPlaneState(cwd, state);
+
+    const legacy = await loadState(cwd);
+    expect(legacy).toBeNull();
   });
 });
 
@@ -200,6 +226,20 @@ describe("session and context commands", () => {
       "brainstorming",
       "writing-plans",
     ]);
+    expect((localSkills as Record<string, any>).local_skill_catalog).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "custom-checklist",
+          name: "custom-checklist",
+          description: "Local project checklist for repo-specific validation.",
+          source: "project",
+        }),
+        expect.objectContaining({
+          key: "brainstorming",
+          source: "bundled",
+        }),
+      ]),
+    );
 
     const upstreamSkills = await runGuard(["skills", "--stage", "review3", "--source", "upstream"], { cwd });
     expect(upstreamSkills.status).toBe("PASS");
@@ -207,6 +247,7 @@ describe("session and context commands", () => {
       "verification-before-completion",
       "finishing-a-development-branch",
     ]);
+    expect((upstreamSkills as Record<string, unknown>).local_skill_catalog).toEqual([]);
   });
 
   test("rejects attaching a root outside the workspace", async () => {

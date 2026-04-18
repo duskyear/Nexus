@@ -31,6 +31,8 @@ function createState(overrides: Partial<HarnessState> = {}): HarnessState {
     adc_completed: true,
     last_verification_claim: null,
     last_verification_evidence: [],
+    active_operator: "ide",
+    operator_lock_reason: null,
     ...overrides,
   };
 }

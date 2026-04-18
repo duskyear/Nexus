@@ -28,6 +28,7 @@ function formatText(result: Awaited<ReturnType<typeof runGuard>>): string {
   if (result.session_surface) {
     const surface = result.session_surface as Record<string, unknown>;
     lines.push(`session_surface.current_stage: ${String(surface.current_stage ?? "unknown")}`);
+    lines.push(`session_surface.work_mode: ${String(surface.work_mode ?? "unknown")}`);
     lines.push(`session_surface.execution_mode: ${String(surface.execution_mode ?? "unknown")}`);
     lines.push(`session_surface.permission_profile: ${String(surface.permission_profile ?? "none")}`);
     lines.push(`session_surface.next_recommended_action: ${String(surface.next_recommended_action ?? "none")}`);
@@ -38,6 +39,7 @@ function formatText(result: Awaited<ReturnType<typeof runGuard>>): string {
   if (result.session_compact) {
     const compact = result.session_compact as Record<string, unknown>;
     lines.push(`session_compact.current_stage: ${String(compact.current_stage ?? "unknown")}`);
+    lines.push(`session_compact.work_mode: ${String(compact.work_mode ?? "unknown")}`);
     lines.push(`session_compact.execution_mode: ${String(compact.execution_mode ?? "unknown")}`);
     lines.push(`session_compact.permission_profile: ${String(compact.permission_profile ?? "none")}`);
     lines.push(`session_compact.primary_root: ${String(compact.primary_root ?? "unknown")}`);
@@ -54,6 +56,7 @@ function formatText(result: Awaited<ReturnType<typeof runGuard>>): string {
   if (result.context_surface) {
     const surface = result.context_surface as Record<string, unknown>;
     lines.push(`context_surface.current_stage: ${String(surface.current_stage ?? "unknown")}`);
+    lines.push(`context_surface.work_mode: ${String(surface.work_mode ?? "unknown")}`);
     lines.push(`context_surface.execution_mode: ${String(surface.execution_mode ?? "unknown")}`);
     lines.push(`context_surface.permission_profile: ${String(surface.permission_profile ?? "none")}`);
     lines.push(`context_surface.attached_roots: ${(surface.attached_roots as string[] | undefined)?.join(", ") ?? "none"}`);
@@ -67,6 +70,7 @@ function formatText(result: Awaited<ReturnType<typeof runGuard>>): string {
     const taskCounts = exported.task_counts as Record<string, unknown> | undefined;
     const evidenceCounts = exported.evidence_counts as Record<string, unknown> | undefined;
     lines.push(`context_export.current_stage: ${String(exported.current_stage ?? "unknown")}`);
+    lines.push(`context_export.work_mode: ${String(exported.work_mode ?? "unknown")}`);
     lines.push(`context_export.execution_mode: ${String(exported.execution_mode ?? "unknown")}`);
     lines.push(`context_export.permission_profile: ${String(exported.permission_profile ?? "none")}`);
     lines.push(`context_export.primary_root: ${String(exported.primary_root ?? "unknown")}`);
@@ -150,6 +154,7 @@ function formatText(result: Awaited<ReturnType<typeof runGuard>>): string {
     const taskCounts = summary.task_counts as Record<string, unknown> | undefined;
     const evidenceCounts = summary.evidence_counts as Record<string, unknown> | undefined;
     lines.push(`usage_summary.current_stage: ${String(summary.current_stage ?? "unknown")}`);
+    lines.push(`usage_summary.work_mode: ${String(summary.work_mode ?? "unknown")}`);
     lines.push(`usage_summary.execution_mode: ${String(summary.execution_mode ?? "unknown")}`);
     lines.push(`usage_summary.permission_profile: ${String(summary.permission_profile ?? "none")}`);
     if (taskCounts) {
