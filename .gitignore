@@ -10,3 +10,5 @@
 .codex/skills/.system/**
 !.codex/prompts/
 !.codex/prompts/**
+!.codex/rules/
+!.codex/rules/**

@@ -1,0 +1,31 @@
+# .codex/rules/default.rules
+
+# 物理级指令拦截规则 (Hard Rules)
+# 优先级高于 Prompt，直接由于底层执行引擎拦截。
+
+# 1. 禁止破坏性回滚
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "禁止物理级破坏性回滚。请改用 git restore 或 harness:revert 阶段回退。"
+)
+
+# 2. 禁止强制推送
+prefix_rule(
+    pattern = ["git", "push", "--force"],
+    decision = "forbidden",
+    justification = "禁止强推覆盖远程历史。请使用标准 push。"
+)
+
+# 3. 敏感操作二次确认
+prefix_rule(
+    pattern = ["rm", "-rf", "/"],
+    decision = "forbidden",
+    justification = "绝对禁止根目录递归删除。"
+)
+
+prefix_rule(
+    pattern = ["gh", "secret"],
+    decision = "prompt",
+    justification = "涉及 GitHub Secret 的操作必须由人类手动确认。"
+)
