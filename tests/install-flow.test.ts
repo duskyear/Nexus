@@ -61,6 +61,14 @@ function runBootstrap(cwd: string, env: NodeJS.ProcessEnv, args: string[] = []):
   }
 }
 
+function runInstalledGuard(cwd: string, env: NodeJS.ProcessEnv, args: string[] = []): { status: number | null; stdout: string; stderr: string } {
+  return spawnSync(process.execPath, ["--import", "tsx", "./tools/guard/cli/index.ts", ...args], {
+    cwd,
+    env,
+    encoding: "utf8",
+  });
+}
+
 describe("installation flow", () => {
   test("bootstrap can install harness files and method sources together", async () => {
     const project = await createTempDir("harness-bootstrap-project-");
@@ -98,6 +106,10 @@ describe("installation flow", () => {
     expect(JSON.parse(await readFile(join(project, "package.json"), "utf8")).scripts.doctor).toBeDefined();
     expect(await readFile(join(home, ".codex", "superpowers", "skills", "alpha", "SKILL.md"), "utf8")).toContain("Alpha");
     expect(await readFile(join(project, ".omx", "setup-scope.json"), "utf8")).toContain("\"project\"");
+
+    const doctor = runInstalledGuard(project, env, ["doctor"]);
+    expect(doctor.status).toBe(0);
+    expect(doctor.stdout).toContain("stage: doctor");
   });
 
   test("doctor can fix missing external method sources", async () => {

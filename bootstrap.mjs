@@ -17,34 +17,15 @@ const BUNDLE_FILES = [
   "harness/PROMPT_TEMPLATES.md",
   "harness/REVIEW_GATE_CHECKLIST.md",
   "harness/guard.config.json",
-  "tools/guard/cli/index.ts",
-  "tools/guard/cli/run.ts",
-  "tools/guard/core/commands.ts",
-  "tools/guard/core/types.ts",
-  "tools/guard/schema/config.ts",
-  "tools/guard/schema/state.ts",
-  "tools/guard/state/store.ts",
-  "tools/control-plane/core/openspec.ts",
-  "tools/control-plane/core/session.ts",
-  "tools/control-plane/core/mode.ts",
-  "tools/control-plane/core/verification.ts",
-  "tools/control-plane/core/workflow.ts",
-  "tools/control-plane/registry/commands.ts",
-  "tools/control-plane/schema/evidence-log.ts",
-  "tools/control-plane/schema/index.ts",
-  "tools/control-plane/schema/runtime-context.ts",
-  "tools/control-plane/schema/session-context.ts",
-  "tools/control-plane/schema/workflow-state.ts",
-  "tools/control-plane/state/store.ts",
-  "tools/templates/cli/index.ts",
-  "tools/templates/cli/run.ts",
-  "tools/templates/core/templates.ts",
-  "tools/templates/core/types.ts",
-  "tools/orchestrator/cli/index.ts",
-  "tools/orchestrator/cli/run.ts",
-  "tools/orchestrator/core/commands.ts",
-  "tools/orchestrator/core/types.ts",
   "README.md"
+];
+
+const BUNDLE_DIRS = [
+  "tools/control-plane",
+  "tools/guard",
+  "tools/orchestrator",
+  "tools/shared",
+  "tools/templates",
 ];
 
 function isHumanOwned(path) {
@@ -167,6 +148,15 @@ async function main() {
   }
 
   await copyDirectoryIfSafe(join(bundleDir, "skills"), join(hostRoot, "skills"), "skills", conflicts);
+
+  for (const relDir of BUNDLE_DIRS) {
+    await copyDirectoryIfSafe(
+      join(bundleDir, ...relDir.split("/")),
+      join(hostRoot, ...relDir.split("/")),
+      relDir,
+      conflicts,
+    );
+  }
 
   for (const relPath of BUNDLE_FILES) {
     const sourcePath = join(bundleDir, ...relPath.split("/"));

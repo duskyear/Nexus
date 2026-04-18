@@ -1,3 +1,4 @@
+node_modules/
 .harness/
 .harness-state.json
 .orchestrator-log.json
